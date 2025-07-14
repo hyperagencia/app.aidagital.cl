@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard UGC - AIDA Digital</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <!-- ✅ MÚLTIPLES DECLARACIONES UTF-8 -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="es">
+    <script src="https://unpkg.com/react@18/umd/react.development.js" charset="utf-8"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,7 +74,9 @@
                 try {
                     const response = await fetch(`${API_BASE}/auth.php?action=verify`, {
                         headers: {
-                            'Authorization': `Bearer ${token}`
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json; charset=utf-8',
+                            'Content-Type': 'application/json; charset=utf-8'
                         }
                     });
                     const data = await response.json();
@@ -93,7 +98,8 @@
                     const response = await fetch(`${API_BASE}/auth.php?action=login`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json; charset=utf-8',
+                            'Accept': 'application/json; charset=utf-8'
                         },
                         body: JSON.stringify({ email, password })
                     });
@@ -126,10 +132,10 @@
             return useContext(AuthContext);
         }
 
-        // Componente de Login
+        // Componente de Login (SIN valores por defecto)
         function Login() {
-            const [email, setEmail] = useState('admin@aidadigital.cl');
-            const [password, setPassword] = useState('password123');
+            const [email, setEmail] = useState('');  // ✅ Campo vacío
+            const [password, setPassword] = useState('');  // ✅ Campo vacío
             const [isLoading, setIsLoading] = useState(false);
             const [error, setError] = useState('');
             const { login } = useAuth();
@@ -176,6 +182,7 @@
                                 value: email,
                                 onChange: (e) => setEmail(e.target.value),
                                 className: 'w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-30 focus:border-purple-600 transition-all duration-200',
+                                placeholder: 'tu@email.com',
                                 required: true
                             })
                         ),
@@ -188,6 +195,7 @@
                                 value: password,
                                 onChange: (e) => setPassword(e.target.value),
                                 className: 'w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-30 focus:border-purple-600 transition-all duration-200',
+                                placeholder: '••••••••',
                                 required: true
                             })
                         ),
@@ -247,7 +255,7 @@
                     )
                 ),
                 
-                // Saludo personalizado - Estilo Figma
+                // Saludo personalizado
                 React.createElement('div', {
                     className: 'p-8'
                 },
@@ -262,7 +270,7 @@
                     }, 'AIDA Digital Marketing')
                 ),
                 
-                // Menú de navegación - Estilo Figma
+                // Menú de navegación
                 React.createElement('nav', {
                     className: 'flex-1 px-6 space-y-3'
                 },
@@ -279,7 +287,7 @@
                     )
                 ),
                 
-                // Logout - Estilo Figma
+                // Logout
                 React.createElement('div', {
                     className: 'p-6 border-t border-gray-100'
                 },
@@ -291,7 +299,7 @@
             );
         }
 
-        // Componente Dashboard Principal
+        // Componente Dashboard Principal - ✅ ARREGLADO para mostrar TODOS los registros
         function DashboardHome() {
             const [stats, setStats] = useState({
                 total: 0,
@@ -300,7 +308,6 @@
                 platforms: {}
             });
             const [loading, setLoading] = useState(true);
-            const { user } = useAuth();
 
             useEffect(() => {
                 fetchStats();
@@ -308,7 +315,13 @@
 
             const fetchStats = async () => {
                 try {
-                    const response = await fetch(`${API_BASE}/creators.php`);
+                    // ✅ Obtener TODOS los creators con UTF-8
+                    const response = await fetch(`${API_BASE}/creators.php?limit=all`, {
+                        headers: {
+                            'Accept': 'application/json; charset=utf-8',
+                            'Content-Type': 'application/json; charset=utf-8'
+                        }
+                    });
                     const data = await response.json();
                     
                     if (data.success) {
@@ -338,6 +351,8 @@
                             today: todayCount,
                             platforms: platformCounts
                         });
+
+                        console.log('✅ Dashboard stats loaded - Total creators:', total);
                     }
                 } catch (error) {
                     console.error('Error fetching stats:', error);
@@ -398,11 +413,10 @@
                         }, 'Resumen de actividad y estadísticas principales')
                     ),
 
-                    // Cards de estadísticas - Estilo Figma
+                    // Cards de estadísticas
                     React.createElement('div', {
                         className: 'grid grid-cols-1 md:grid-cols-3 gap-8 mb-12'
                     },
-                        // Card 1 - Total creators (Blanco con números grises)
                         React.createElement(StatCard, {
                             title: 'Creators registrados en la plataforma',
                             value: stats.total,
@@ -411,7 +425,6 @@
                             buttonText: 'Ver creators'
                         }),
                         
-                        // Card 2 - Este mes (Morado gradiente)
                         React.createElement(StatCard, {
                             title: 'Registros en el último mes',
                             value: stats.thisMonth,
@@ -420,7 +433,6 @@
                             buttonText: 'Ver detalles'
                         }),
                         
-                        // Card 3 - Últimas 24h (Blanco con números negros)
                         React.createElement(StatCard, {
                             title: 'Registros en las últimas 24 hrs',
                             value: stats.today,
@@ -430,7 +442,7 @@
                         })
                     ),
 
-                    // Distribución por plataformas - Estilo Figma
+                    // Distribución por plataformas
                     React.createElement('div', {
                         className: 'bg-white rounded-3xl p-8 shadow-sm border border-gray-100'
                     },
@@ -441,45 +453,59 @@
                         React.createElement('div', {
                             className: 'space-y-1'
                         },
-                            // Instagram
-                            React.createElement(PlatformCard, {
-                                platform: 'Instagram',
-                                count: stats.platforms.instagram || 0,
-                                color: 'text-purple-400'
-                            }),
+                            React.createElement('div', {
+                                className: 'flex items-center justify-between py-4'
+                            },
+                                React.createElement('span', {
+                                    className: 'text-lg font-medium text-gray-900'
+                                }, 'Instagram'),
+                                React.createElement('span', {
+                                    className: 'text-3xl font-bold text-purple-400'
+                                }, loading ? '...' : (stats.platforms.instagram || 0))
+                            ),
                             
                             React.createElement('hr', {
                                 className: 'border-gray-100'
                             }),
                             
-                            // TikTok
-                            React.createElement(PlatformCard, {
-                                platform: 'TikTok',
-                                count: stats.platforms.tiktok || 0,
-                                color: 'text-purple-400'
-                            }),
+                            React.createElement('div', {
+                                className: 'flex items-center justify-between py-4'
+                            },
+                                React.createElement('span', {
+                                    className: 'text-lg font-medium text-gray-900'
+                                }, 'TikTok'),
+                                React.createElement('span', {
+                                    className: 'text-3xl font-bold text-purple-400'
+                                }, loading ? '...' : (stats.platforms.tiktok || 0))
+                            ),
                             
                             React.createElement('hr', {
                                 className: 'border-gray-100'
                             }),
                             
-                            // Otras redes
-                            React.createElement(PlatformCard, {
-                                platform: 'Otras redes',
-                                count: stats.platforms.otra || 0,
-                                color: 'text-purple-400'
-                            })
+                            React.createElement('div', {
+                                className: 'flex items-center justify-between py-4'
+                            },
+                                React.createElement('span', {
+                                    className: 'text-lg font-medium text-gray-900'
+                                }, 'Otras redes'),
+                                React.createElement('span', {
+                                    className: 'text-3xl font-bold text-purple-400'
+                                }, loading ? '...' : (stats.platforms.otra || 0))
+                            )
                         )
                     )
                 )
             );
         }
 
-        // Componente Creators List con filtros
+        // ✅ Componente Creators List con FAVORITOS
         function CreatorsList() {
             const [creators, setCreators] = useState([]);
+            const [displayedCreators, setDisplayedCreators] = useState([]);
             const [filteredCreators, setFilteredCreators] = useState([]);
             const [loading, setLoading] = useState(true);
+            const [loadingMore, setLoadingMore] = useState(false);
             
             // Estados de filtros
             const [searchTerm, setSearchTerm] = useState('');
@@ -488,30 +514,56 @@
             const [ageRange, setAgeRange] = useState({ min: '', max: '' });
             const [selectedNationality, setSelectedNationality] = useState('');
             const [selectedLocation, setSelectedLocation] = useState('');
+            const [selectedFollowersRange, setSelectedFollowersRange] = useState('');
+            const [showOnlyFavorites, setShowOnlyFavorites] = useState(false); // ✅ NUEVO
             
-            // Opciones para filtros (se generan dinámicamente)
+            // Paginación
+            const [currentPage, setCurrentPage] = useState(1);
+            const itemsPerPage = 10;
+            
+            // Opciones para filtros
             const [filterOptions, setFilterOptions] = useState({
                 interests: [],
                 platforms: [],
                 nationalities: [],
-                locations: []
+                locations: [],
+                followersRanges: [] // ✅ Nuevo
             });
 
             useEffect(() => {
                 fetchCreators();
-            }, []);
+            }, [showOnlyFavorites]); // ✅ Refetch cuando cambie filtro de favoritos
 
             useEffect(() => {
                 applyFilters();
-            }, [creators, searchTerm, selectedInterests, selectedPlatform, ageRange, selectedNationality, selectedLocation]);
+            }, [creators, searchTerm, selectedInterests, selectedPlatform, ageRange, selectedNationality, selectedLocation, selectedFollowersRange]); // showOnlyFavorites no necesario aquí porque refetch
+
+            useEffect(() => {
+                // ✅ Actualizar creators mostrados cuando cambian los filtros
+                setDisplayedCreators(filteredCreators.slice(0, itemsPerPage));
+                setCurrentPage(1);
+            }, [filteredCreators]);
 
             const fetchCreators = async () => {
                 try {
-                    const response = await fetch(`${API_BASE}/creators.php`);
+                    // ✅ Incluir filtro de favoritos en URL
+                    let url = `${API_BASE}/creators.php?limit=all`;
+                    if (showOnlyFavorites) {
+                        url += '&favorites=true';
+                    }
+                    
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json; charset=utf-8',
+                            'Content-Type': 'application/json; charset=utf-8'
+                        }
+                    });
                     const data = await response.json();
                     if (data.success) {
                         setCreators(data.data.creators);
+                        setDisplayedCreators(data.data.creators.slice(0, itemsPerPage));
                         generateFilterOptions(data.data.creators);
+                        console.log('✅ Creators loaded:', data.data.creators.length);
                     }
                 } catch (error) {
                     console.error('Error fetching creators:', error);
@@ -519,11 +571,46 @@
                 setLoading(false);
             };
 
+            // ✅ NUEVA función para manejar favoritos
+            const toggleFavorite = async (creatorId) => {
+                try {
+                    const response = await fetch(`${API_BASE}/favorites.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8',
+                            'Accept': 'application/json; charset=utf-8'
+                        },
+                        body: JSON.stringify({ creator_id: creatorId })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        // Actualizar estado local
+                        setCreators(prev => prev.map(creator => 
+                            creator.id === creatorId 
+                                ? { ...creator, is_favorite: data.data.is_favorite }
+                                : creator
+                        ));
+                        
+                        setDisplayedCreators(prev => prev.map(creator => 
+                            creator.id === creatorId 
+                                ? { ...creator, is_favorite: data.data.is_favorite }
+                                : creator
+                        ));
+                        
+                        console.log(`✅ Creator ${creatorId} ${data.data.action} favoritos`);
+                    }
+                } catch (error) {
+                    console.error('Error toggling favorite:', error);
+                }
+            };
+
             const generateFilterOptions = (creatorsData) => {
                 const interests = new Set();
                 const platforms = new Set();
                 const nationalities = new Set();
                 const locations = new Set();
+                const followersRanges = new Set(); // ✅ Ahora funcional
 
                 creatorsData.forEach(creator => {
                     // Intereses
@@ -545,13 +632,19 @@
                     if (creator.location) {
                         locations.add(creator.location);
                     }
+
+                    // ✅ Rangos de seguidores
+                    if (creator.followers_range) {
+                        followersRanges.add(creator.followers_range);
+                    }
                 });
 
                 setFilterOptions({
                     interests: Array.from(interests).sort(),
                     platforms: Array.from(platforms).sort(),
                     nationalities: Array.from(nationalities).sort(),
-                    locations: Array.from(locations).sort()
+                    locations: Array.from(locations).sort(),
+                    followersRanges: Array.from(followersRanges).sort() // ✅ Ahora funcional
                 });
             };
 
@@ -605,7 +698,26 @@
                     );
                 }
 
+                // ✅ Filtro por rango de seguidores (ahora funcional)
+                if (selectedFollowersRange) {
+                    filtered = filtered.filter(creator => 
+                        creator.followers_range === selectedFollowersRange
+                    );
+                }
+
                 setFilteredCreators(filtered);
+            };
+
+            // ✅ Función para cargar más
+            const loadMore = () => {
+                setLoadingMore(true);
+                setTimeout(() => {
+                    const nextPage = currentPage + 1;
+                    const newItems = filteredCreators.slice(0, nextPage * itemsPerPage);
+                    setDisplayedCreators(newItems);
+                    setCurrentPage(nextPage);
+                    setLoadingMore(false);
+                }, 500);
             };
 
             const clearFilters = () => {
@@ -615,6 +727,8 @@
                 setAgeRange({ min: '', max: '' });
                 setSelectedNationality('');
                 setSelectedLocation('');
+                setSelectedFollowersRange('');
+                setShowOnlyFavorites(false); // ✅ Reset favoritos también
             };
 
             const handleInterestToggle = (interest) => {
@@ -625,13 +739,14 @@
                 );
             };
 
+            // ✅ Función para obtener el label del rango de seguidores
             const getFollowersLabel = (followersRange) => {
                 const labels = {
                     'menos-1000': 'Menos de 1K',
-                    '1000-4999': '1K-5K',
-                    '5000-9999': '5K-10K',
-                    '10000-24999': '10K-25K',
-                    '25000-49999': '25K-50K',
+                    '1000-4999': '1K - 5K',
+                    '5000-9999': '5K - 10K',
+                    '10000-24999': '10K - 25K',
+                    '25000-49999': '25K - 50K',
                     'mas-50000': '50K+'
                 };
                 return labels[followersRange] || followersRange;
@@ -662,6 +777,15 @@
                 ).join(', ');
             };
 
+            // ✅ Función para obtener URL de redes sociales (REAL - con API corregida)
+            const getPlatformUrl = (creator, platform) => {
+                if (creator.social_networks) {
+                    const network = creator.social_networks.find(sn => sn.platform === platform);
+                    return network ? network.profile_link : '#';
+                }
+                return '#';
+            };
+
             if (loading) {
                 return React.createElement('div', {
                     className: 'flex-1 bg-gray-50 overflow-auto p-8'
@@ -675,6 +799,8 @@
                     )
                 );
             }
+
+            const hasMoreToLoad = displayedCreators.length < filteredCreators.length;
 
             return React.createElement('div', {
                 className: 'flex-1 bg-gray-50 overflow-auto'
@@ -714,37 +840,55 @@
                         )
                     ),
 
-                    // Filtros
+                    // ✅ Filtros MEJORADOS con filtro de favoritos
                     React.createElement('div', {
                         className: 'bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6'
                     },
+                        // ✅ NUEVO: Toggle de solo favoritos
                         React.createElement('div', {
-                            className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4'
+                            className: 'mb-4 pb-4 border-b border-gray-100'
+                        },
+                            React.createElement('label', {
+                                className: 'flex items-center space-x-3 cursor-pointer'
+                            },
+                                React.createElement('input', {
+                                    type: 'checkbox',
+                                    checked: showOnlyFavorites,
+                                    onChange: (e) => setShowOnlyFavorites(e.target.checked),
+                                    className: 'w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2'
+                                }),
+                                React.createElement('span', {
+                                    className: 'text-lg font-medium text-gray-900'
+                                }, '💖 Solo mis favoritos'),
+                                showOnlyFavorites && React.createElement('span', {
+                                    className: 'px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full'
+                                }, 'Activo')
+                            )
+                        ),
+
+                        React.createElement('div', {
+                            className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4'
                         },
                             // Filtro Intereses
                             React.createElement('div', {},
                                 React.createElement('label', {
                                     className: 'block text-sm font-medium text-gray-700 mb-2'
                                 }, 'Intereses'),
-                                React.createElement('div', {
-                                    className: 'relative'
-                                },
-                                    React.createElement('select', {
-                                        multiple: true,
-                                        value: selectedInterests,
-                                        onChange: (e) => {
-                                            const value = e.target.value;
-                                            handleInterestToggle(value);
-                                        },
-                                        className: 'w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-30 focus:border-purple-600 transition-all duration-200'
+                                React.createElement('select', {
+                                    multiple: true,
+                                    value: selectedInterests,
+                                    onChange: (e) => {
+                                        const value = e.target.value;
+                                        handleInterestToggle(value);
                                     },
-                                        React.createElement('option', { value: '' }, 'Seleccionar...'),
-                                        filterOptions.interests.map(interest =>
-                                            React.createElement('option', {
-                                                key: interest,
-                                                value: interest
-                                            }, formatInterests([interest]))
-                                        )
+                                    className: 'w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-30 focus:border-purple-600 transition-all duration-200'
+                                },
+                                    React.createElement('option', { value: '' }, 'Seleccionar...'),
+                                    filterOptions.interests.map(interest =>
+                                        React.createElement('option', {
+                                            key: interest,
+                                            value: interest
+                                        }, formatInterests([interest]))
                                     )
                                 )
                             ),
@@ -765,6 +909,26 @@
                                             key: platform,
                                             value: platform
                                         }, platform.charAt(0).toUpperCase() + platform.slice(1))
+                                    )
+                                )
+                            ),
+
+                            // ✅ Filtro Seguidores (ahora funcional con API corregida)
+                            React.createElement('div', {},
+                                React.createElement('label', {
+                                    className: 'block text-sm font-medium text-gray-700 mb-2'
+                                }, 'Seguidores'),
+                                React.createElement('select', {
+                                    value: selectedFollowersRange,
+                                    onChange: (e) => setSelectedFollowersRange(e.target.value),
+                                    className: 'w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-30 focus:border-purple-600 transition-all duration-200'
+                                },
+                                    React.createElement('option', { value: '' }, 'Todos los rangos'),
+                                    filterOptions.followersRanges.map(range =>
+                                        React.createElement('option', {
+                                            key: range,
+                                            value: range
+                                        }, getFollowersLabel(range))
                                     )
                                 )
                             ),
@@ -835,13 +999,23 @@
                             )
                         ),
 
-                        // Botón limpiar filtros
+                        // ✅ Info y botón limpiar filtros MEJORADO con favoritos
                         React.createElement('div', {
                             className: 'flex justify-between items-center'
                         },
-                            React.createElement('p', {
-                                className: 'text-sm text-gray-600'
-                            }, `Mostrando ${filteredCreators.length} creators de ${creators.length} total`),
+                            React.createElement('div', {
+                                className: 'flex items-center space-x-4'
+                            },
+                                React.createElement('p', {
+                                    className: 'text-sm text-gray-600'
+                                }, `Mostrando ${displayedCreators.length} de ${filteredCreators.length} creators (${creators.length} total)`),
+                                filteredCreators.length !== creators.length && React.createElement('span', {
+                                    className: 'px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full'
+                                }, 'Filtrado'),
+                                showOnlyFavorites && React.createElement('span', {
+                                    className: 'px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full'
+                                }, '💖 Solo favoritos')
+                            ),
                             React.createElement('button', {
                                 onClick: clearFilters,
                                 className: 'px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium'
@@ -849,11 +1023,11 @@
                         )
                     ),
 
-                    // Lista de creators
+                    // ✅ Lista de creators CON paginación
                     React.createElement('div', {
                         className: 'space-y-4'
                     },
-                        filteredCreators.length === 0 ? 
+                        displayedCreators.length === 0 ? 
                             React.createElement('div', {
                                 className: 'bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100'
                             },
@@ -867,19 +1041,41 @@
                                     className: 'text-gray-600'
                                 }, 'Intenta ajustar los filtros o la búsqueda')
                             ) :
-                            filteredCreators.map(creator => 
+                            // ✅ Creators con URLs reales y BOTÓN DE FAVORITOS
+                            displayedCreators.map(creator => 
                                 React.createElement('div', {
                                     key: creator.id,
-                                    className: 'bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow'
+                                    className: 'bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative'
                                 },
-                                    React.createElement('div', {
-                                        className: 'grid grid-cols-1 md:grid-cols-4 gap-6'
+                                    // ✅ NUEVO: Botón de favorito (esquina superior derecha)
+                                    React.createElement('button', {
+                                        onClick: () => toggleFavorite(creator.id),
+                                        className: `absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                                            creator.is_favorite 
+                                                ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                                                : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-red-500'
+                                        }`,
+                                        title: creator.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'
                                     },
-                                        // Columna 1: Info básica
+                                        React.createElement('span', {
+                                            className: 'text-lg'
+                                        }, creator.is_favorite ? '❤️' : '🤍')
+                                    ),
+
+                                    React.createElement('div', {
+                                        className: 'grid grid-cols-1 md:grid-cols-5 gap-6'
+                                    },
+                                        // Columna 1: Info básica CON indicador de favorito
                                         React.createElement('div', {},
-                                            React.createElement('h3', {
-                                                className: 'text-lg font-semibold text-gray-900 mb-1'
-                                            }, creator.full_name),
+                                            React.createElement('div', {
+                                                className: 'flex items-start space-x-3 mb-3'
+                                            },
+                                                React.createElement('h3', {
+                                                    className: `text-lg font-semibold mb-1 ${creator.is_favorite ? 'text-red-700' : 'text-gray-900'}`
+                                                }, 
+                                                    creator.is_favorite ? `💖 ${creator.full_name}` : creator.full_name
+                                                )
+                                            ),
                                             React.createElement('p', {
                                                 className: 'text-gray-600 mb-3'
                                             }, `${creator.age} años, ${creator.nationality.charAt(0).toUpperCase() + creator.nationality.slice(1)}`),
@@ -908,7 +1104,7 @@
                                             }, formatInterests(creator.interests))
                                         ),
 
-                                        // Columna 3: Plataformas
+                                        // Columna 3: Plataformas CON URLs REALES
                                         React.createElement('div', {},
                                             React.createElement('h4', {
                                                 className: 'font-medium text-gray-900 mb-2'
@@ -916,15 +1112,16 @@
                                             creator.platforms && creator.platforms.length > 0 ?
                                                 creator.platforms.map((platform, index) =>
                                                     React.createElement('div', {
-                                                        key: platform,
+                                                        key: `${platform}-${index}`,
                                                         className: 'mb-1'
                                                     },
                                                         React.createElement('span', {
                                                             className: 'text-sm text-gray-600'
                                                         }, `${platform.charAt(0).toUpperCase() + platform.slice(1)} `),
                                                         React.createElement('a', {
-                                                            href: '#', // Aquí iría el link real del creator
+                                                            href: getPlatformUrl(creator, platform), // ✅ URL REAL
                                                             target: '_blank',
+                                                            rel: 'noopener noreferrer',
                                                             className: 'text-purple-600 hover:text-purple-700 text-sm'
                                                         }, '🔗 Ver perfil')
                                                     )
@@ -934,7 +1131,17 @@
                                                 }, 'Sin plataformas')
                                         ),
 
-                                        // Columna 4: Marca asignada
+                                        // ✅ Columna 4: Seguidores
+                                        React.createElement('div', {},
+                                            React.createElement('h4', {
+                                                className: 'font-medium text-gray-900 mb-2'
+                                            }, 'Seguidores'),
+                                            React.createElement('p', {
+                                                className: 'text-gray-600 text-sm'
+                                            }, getFollowersLabel(creator.followers_range || 'sin-especificar'))
+                                        ),
+
+                                        // Columna 5: Marca asignada
                                         React.createElement('div', {},
                                             React.createElement('h4', {
                                                 className: 'font-medium text-gray-900 mb-2'
@@ -952,7 +1159,7 @@
                                         )
                                     ),
                                     
-                                    // Información adicional (ubicación, modalidad)
+                                    // Información adicional
                                     React.createElement('div', {
                                         className: 'mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4'
                                     },
@@ -974,7 +1181,29 @@
                                         )
                                     )
                                 )
+                            ),
+
+                        // ✅ Botón "Cargar más" (solo si no estamos en modo favoritos o hay más que mostrar)
+                        hasMoreToLoad && React.createElement('div', {
+                            className: 'text-center py-8'
+                        },
+                            React.createElement('button', {
+                                onClick: loadMore,
+                                disabled: loadingMore,
+                                className: `px-8 py-4 bg-purple-600 text-white rounded-xl hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-opacity-30 transition-all duration-200 ${loadingMore ? 'opacity-75 cursor-not-allowed' : ''}`
+                            },
+                                loadingMore ? 
+                                    React.createElement('div', {
+                                        className: 'flex items-center justify-center'
+                                    },
+                                        React.createElement('div', {
+                                            className: 'loading-spinner mr-2'
+                                        }),
+                                        'Cargando...'
+                                    ) : 
+                                    `Cargar más ${showOnlyFavorites ? 'favoritos' : 'creators'} (${filteredCreators.length - displayedCreators.length} restantes)`
                             )
+                        )
                     )
                 )
             );
