@@ -166,46 +166,69 @@ const AppContent = () => {
 
     // Mostrar aplicación principal
     return (
-        <div className="flex h-screen bg-gray-50">
-            {/* Sidebar */}
-            <Sidebar
-                currentPage={currentPage}
-                onNavigate={handleNavigate}
-                isMobileOpen={isMobileMenuOpen}
-                onMobileClose={() => setIsMobileMenuOpen(false)}
-            />
-            
-            {/* Contenido principal */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Header móvil */}
-                <div className="md:hidden bg-white border-b border-gray-200 p-4">
-                    <button
-                        onClick={() => setIsMobileMenuOpen(true)}
-                        className="text-gray-600 hover:text-gray-900"
-                    >
-                        <span className="text-xl">☰</span>
-                    </button>
+        <>
+            {/* Indicador de modo desarrollo */}
+            {config.IS_DEVELOPMENT && (
+                <div style={{
+                    position: 'fixed',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 1000,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    padding: '8px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    backdropFilter: 'blur(10px)'
+                }}>
+                    🚧 MODO DESARROLLO
                 </div>
+            )}
+            
+            <div className="flex h-screen bg-gray-50">
+                {/* Sidebar */}
+                <Sidebar
+                    currentPage={currentPage}
+                    onNavigate={handleNavigate}
+                    isMobileOpen={isMobileMenuOpen}
+                    onMobileClose={() => setIsMobileMenuOpen(false)}
+                />
                 
-                {/* Contenido de la página */}
-                <main className="flex-1 overflow-auto">
-                    <React.Suspense 
-                        fallback={
-                            <div className="flex-1 bg-gray-50 overflow-auto p-8">
-                                <div className="flex items-center justify-center min-h-96">
-                                    <div className="text-center">
-                                        <UI.Spinner size="xl" className="mx-auto mb-4" />
-                                        <p className="text-gray-600">Cargando...</p>
+                {/* Contenido principal */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* Header móvil */}
+                    <div className="md:hidden bg-white border-b border-gray-200 p-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="text-gray-600 hover:text-gray-900"
+                        >
+                            <span className="text-xl">☰</span>
+                        </button>
+                    </div>
+                    
+                    {/* Contenido de la página */}
+                    <main className="flex-1 overflow-auto">
+                        <React.Suspense 
+                            fallback={
+                                <div className="flex-1 bg-gray-50 overflow-auto p-8">
+                                    <div className="flex items-center justify-center min-h-96">
+                                        <div className="text-center">
+                                            <UI.Spinner size="xl" className="mx-auto mb-4" />
+                                            <p className="text-gray-600">Cargando...</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    >
-                        {renderPage()}
-                    </React.Suspense>
-                </main>
+                            }
+                        >
+                            {renderPage()}
+                        </React.Suspense>
+                    </main>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

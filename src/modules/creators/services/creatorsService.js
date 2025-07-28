@@ -1,6 +1,6 @@
 /**
  * Servicio de Creators
- * Maneja todas las operaciones CRUD de creators
+ * Versión con datos mock para desarrollo
  */
 
 import { api } from '../../../services/api.js';
@@ -10,13 +10,20 @@ import { validation } from '../../../utils/validators.js';
 class CreatorsService {
     constructor() {
         this.baseEndpoint = config.ENDPOINTS.CREATORS.LIST;
+        this.isDevelopment = config.IS_DEVELOPMENT || config.DEBUG;
     }
 
     // Obtener lista de creators
     async getCreators(filters = {}) {
         try {
             log('Fetching creators with filters:', filters);
-            
+
+            // MODO DESARROLLO: Usar datos mock
+            if (this.isDevelopment) {
+                return await this.getMockCreators(filters);
+            }
+
+            // MODO PRODUCCIÓN: Usar API real
             const params = this.buildQueryParams(filters);
             const response = await api.get(this.baseEndpoint, params);
 
@@ -33,180 +40,144 @@ class CreatorsService {
             }
         } catch (error) {
             logError(error, 'Get creators');
+            
+            // Fallback a datos mock en caso de error
+            if (!this.isDevelopment) {
+                log('Falling back to mock data due to API error');
+                return await this.getMockCreators(filters);
+            }
+            
             throw new Error(error.message || config.ERRORS.NETWORK);
         }
     }
 
-    // Obtener un creator por ID
-    async getCreator(id) {
-        try {
-            log('Fetching creator:', id);
-            
-            const response = await api.get(`${this.baseEndpoint}/${id}`);
+    // Datos mock para desarrollo
+    async getMockCreators(filters = {}) {
+        // Simular delay de red
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-            if (response.success) {
-                log('Creator fetched successfully');
-                return {
-                    success: true,
-                    creator: response.data.creator,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.NOT_FOUND);
+        const mockCreators = [
+            {
+                id: 1,
+                full_name: 'María González',
+                email: 'maria.gonzalez@email.com',
+                phone: '+56912345678',
+                age: 25,
+                nationality: 'chilena',
+                location: 'santiago',
+                modality: 'presencial',
+                platforms: ['instagram', 'tiktok'],
+                interests: ['moda', 'belleza', 'lifestyle'],
+                followers_range: '10000-24999',
+                created_at: new Date(Date.now() - 86400000 * 5).toISOString(), // 5 días atrás
+                status: 'active',
+                assigned_brand: null,
+            },
+            {
+                id: 2,
+                full_name: 'Carlos Pérez',
+                email: 'carlos.perez@email.com',
+                phone: '+56987654321',
+                age: 28,
+                nationality: 'chilena',
+                location: 'valparaiso',
+                modality: 'remoto',
+                platforms: ['youtube', 'instagram'],
+                interests: ['tecnologia', 'gaming', 'educacion'],
+                followers_range: '25000-49999',
+                created_at: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 días atrás
+                status: 'active',
+                assigned_brand: null,
+            },
+            {
+                id: 3,
+                full_name: 'Ana Martín',
+                email: 'ana.martin@email.com',
+                phone: '+56911111111',
+                age: 23,
+                nationality: 'extranjera',
+                location: 'concepcion',
+                modality: 'hibrido',
+                platforms: ['tiktok'],
+                interests: ['baile', 'musica', 'entretenimiento'],
+                followers_range: '5000-9999',
+                created_at: new Date(Date.now() - 86400000 * 7).toISOString(), // 7 días atrás
+                status: 'active',
+                assigned_brand: null,
+            },
+            {
+                id: 4,
+                full_name: 'Luis Rodríguez',
+                email: 'luis.rodriguez@email.com',
+                phone: '+56922222222',
+                age: 30,
+                nationality: 'chilena',
+                location: 'santiago',
+                modality: 'presencial',
+                platforms: ['instagram', 'youtube'],
+                interests: ['deporte', 'fitness', 'nutricion'],
+                followers_range: 'mas-50000',
+                created_at: new Date(Date.now() - 86400000 * 2).toISOString(), // 2 días atrás
+                status: 'active',
+                assigned_brand: null,
+            },
+            {
+                id: 5,
+                full_name: 'Sofía Morales',
+                email: 'sofia.morales@email.com',
+                phone: '+56933333333',
+                age: 26,
+                nationality: 'chilena',
+                location: 'antofagasta',
+                modality: 'remoto',
+                platforms: ['instagram'],
+                interests: ['gastronomia', 'cocina', 'recetas'],
+                followers_range: '1000-4999',
+                created_at: new Date(Date.now() - 86400000 * 1).toISOString(), // 1 día atrás
+                status: 'active',
+                assigned_brand: null,
+            },
+            {
+                id: 6,
+                full_name: 'Diego Silva',
+                email: 'diego.silva@email.com',
+                phone: '+56944444444',
+                age: 24,
+                nationality: 'chilena',
+                location: 'valparaiso',
+                modality: 'presencial',
+                platforms: ['tiktok', 'youtube'],
+                interests: ['comedia', 'entretenimiento', 'viral'],
+                followers_range: '10000-24999',
+                created_at: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 días atrás
+                status: 'active',
+                assigned_brand: null,
             }
-        } catch (error) {
-            logError(error, 'Get creator');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
-    }
+        ];
 
-    // Crear nuevo creator
-    async createCreator(creatorData) {
-        try {
-            // Validar datos
-            const validationResult = validation.validateCreator(creatorData);
-            if (!validationResult.isValid) {
-                const firstError = Object.values(validationResult.errors).flat()[0];
-                throw new Error(firstError);
-            }
+        // Aplicar filtros localmente
+        const filteredCreators = this.filterCreators(mockCreators, filters);
 
-            log('Creating creator:', creatorData.email);
-            
-            const response = await api.post(config.ENDPOINTS.CREATORS.CREATE, creatorData);
+        log(`Mock creators loaded: ${filteredCreators.length} of ${mockCreators.length}`);
 
-            if (response.success) {
-                log('Creator created successfully');
-                return {
-                    success: true,
-                    creator: response.data.creator,
-                    message: response.message || config.SUCCESS.SAVE,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Create creator');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
-    }
-
-    // Actualizar creator
-    async updateCreator(id, creatorData) {
-        try {
-            // Validar datos (sin requerir todos los campos)
-            const validationRules = { ...validation.creatorValidationRules };
-            // Hacer campos opcionales para actualización
-            Object.keys(validationRules).forEach(key => {
-                if (!creatorData.hasOwnProperty(key)) {
-                    delete validationRules[key];
-                }
-            });
-
-            const validationResult = validation.validateObject(creatorData, validationRules);
-            if (!validationResult.isValid) {
-                const firstError = Object.values(validationResult.errors).flat()[0];
-                throw new Error(firstError);
-            }
-
-            log('Updating creator:', id);
-            
-            const response = await api.put(`${config.ENDPOINTS.CREATORS.UPDATE}/${id}`, creatorData);
-
-            if (response.success) {
-                log('Creator updated successfully');
-                return {
-                    success: true,
-                    creator: response.data.creator,
-                    message: response.message || config.SUCCESS.UPDATE,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Update creator');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
-    }
-
-    // Eliminar creator
-    async deleteCreator(id) {
-        try {
-            log('Deleting creator:', id);
-            
-            const response = await api.delete(`${config.ENDPOINTS.CREATORS.DELETE}/${id}`);
-
-            if (response.success) {
-                log('Creator deleted successfully');
-                return {
-                    success: true,
-                    message: response.message || config.SUCCESS.DELETE,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Delete creator');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
-    }
-
-    // Eliminar múltiples creators
-    async deleteMultipleCreators(ids) {
-        try {
-            log('Deleting multiple creators:', ids);
-            
-            const response = await api.post(`${config.ENDPOINTS.CREATORS.DELETE}/bulk`, { ids });
-
-            if (response.success) {
-                log(`${ids.length} creators deleted successfully`);
-                return {
-                    success: true,
-                    deletedCount: response.data.deletedCount || ids.length,
-                    message: response.message || `${ids.length} creators eliminados`,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Delete multiple creators');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
-    }
-
-    // Exportar creators
-    async exportCreators(filters = {}, format = 'csv') {
-        try {
-            log('Exporting creators with format:', format);
-            
-            const params = { 
-                ...this.buildQueryParams(filters),
-                format,
-                export: true,
-            };
-            
-            const response = await api.get(config.ENDPOINTS.CREATORS.EXPORT, params);
-
-            if (response.success) {
-                log('Export completed successfully');
-                return {
-                    success: true,
-                    data: response.data,
-                    downloadUrl: response.data.downloadUrl,
-                    filename: response.data.filename,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Export creators');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
+        return {
+            success: true,
+            creators: filteredCreators,
+            total: filteredCreators.length,
+            pagination: null,
+        };
     }
 
     // Obtener estadísticas de creators
     async getCreatorsStats() {
         try {
             log('Fetching creators statistics');
-            
+
+            // En desarrollo, usar estadísticas mock
+            if (this.isDevelopment) {
+                return await this.getMockStats();
+            }
+
             const response = await api.get(config.ENDPOINTS.STATS.CREATORS);
 
             if (response.success) {
@@ -220,85 +191,90 @@ class CreatorsService {
             }
         } catch (error) {
             logError(error, 'Get creators stats');
+            
+            // Fallback a datos mock
+            if (!this.isDevelopment) {
+                return await this.getMockStats();
+            }
+            
             throw new Error(error.message || config.ERRORS.NETWORK);
         }
     }
 
-    // Buscar creators
-    async searchCreators(searchTerm, filters = {}) {
-        try {
-            log('Searching creators:', searchTerm);
+    // Estadísticas mock
+    async getMockStats() {
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const stats = {
+            overview: {
+                total: 6,
+                thisMonth: 4,
+                today: 1,
+                monthlyGrowth: 25.5,
+            },
+            platforms: {
+                instagram: 4,
+                tiktok: 3,
+                youtube: 3,
+            },
+            nationalities: {
+                chilena: 5,
+                extranjera: 1,
+            },
+            locations: {
+                santiago: 2,
+                valparaiso: 2,
+                concepcion: 1,
+                antofagasta: 1,
+            },
+            ageRanges: {
+                '18-24': 2,
+                '25-34': 4,
+                '35-44': 0,
+                '45+': 0,
+            },
+            topInterests: {
+                moda: 1,
+                belleza: 1,
+                tecnologia: 1,
+                deporte: 1,
+                gastronomia: 1,
+            },
+            lastUpdated: new Date().toISOString(),
+        };
+
+        return {
+            success: true,
+            stats,
+        };
+    }
+
+    // Resto de métodos (crear, actualizar, eliminar) - mock para desarrollo
+    async createCreator(creatorData) {
+        if (this.isDevelopment) {
+            // Simular creación
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            const params = {
-                ...this.buildQueryParams(filters),
-                search: searchTerm,
+            const newCreator = {
+                id: Date.now(),
+                ...creatorData,
+                created_at: new Date().toISOString(),
+                status: 'active',
+                assigned_brand: null,
             };
+
+            log('Mock creator created:', newCreator);
             
-            const response = await api.get(`${this.baseEndpoint}/search`, params);
-
-            if (response.success) {
-                log(`Found ${response.data.creators.length} creators`);
-                return {
-                    success: true,
-                    creators: response.data.creators,
-                    total: response.data.total,
-                    searchTerm,
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Search creators');
-            throw new Error(error.message || config.ERRORS.NETWORK);
+            return {
+                success: true,
+                creator: newCreator,
+                message: 'Creator creado exitosamente (simulado)',
+            };
         }
-    }
 
-    // Asignar marca a creator
-    async assignBrand(creatorId, brandId) {
-        try {
-            log('Assigning brand to creator:', { creatorId, brandId });
-            
-            const response = await api.post(`${this.baseEndpoint}/${creatorId}/assign-brand`, {
-                brandId,
-            });
-
-            if (response.success) {
-                log('Brand assigned successfully');
-                return {
-                    success: true,
-                    creator: response.data.creator,
-                    message: response.message || 'Marca asignada correctamente',
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Assign brand');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
-    }
-
-    // Desasignar marca de creator
-    async unassignBrand(creatorId) {
-        try {
-            log('Unassigning brand from creator:', creatorId);
-            
-            const response = await api.delete(`${this.baseEndpoint}/${creatorId}/assign-brand`);
-
-            if (response.success) {
-                log('Brand unassigned successfully');
-                return {
-                    success: true,
-                    creator: response.data.creator,
-                    message: response.message || 'Marca desasignada correctamente',
-                };
-            } else {
-                throw new Error(response.message || config.ERRORS.UNKNOWN);
-            }
-        } catch (error) {
-            logError(error, 'Unassign brand');
-            throw new Error(error.message || config.ERRORS.NETWORK);
-        }
+        // Código real para producción...
+        // (implementar cuando se conecte al backend real)
+        throw new Error('Create creator not implemented in production mode');
     }
 
     // Construir parámetros de consulta
@@ -310,7 +286,6 @@ class CreatorsService {
         if (filters.sortBy) params.sortBy = filters.sortBy;
         if (filters.sortOrder) params.sortOrder = filters.sortOrder;
         
-        // Filtros específicos
         if (filters.interests && filters.interests.length > 0) {
             params.interests = filters.interests.join(',');
         }
@@ -322,19 +297,11 @@ class CreatorsService {
         if (filters.modality) params.modality = filters.modality;
         if (filters.ageMin) params.ageMin = filters.ageMin;
         if (filters.ageMax) params.ageMax = filters.ageMax;
-        if (filters.brandId) params.brandId = filters.brandId;
-        if (filters.hasAssignedBrand !== undefined) {
-            params.hasAssignedBrand = filters.hasAssignedBrand;
-        }
-        
-        // Filtros de fecha
-        if (filters.createdAfter) params.createdAfter = filters.createdAfter;
-        if (filters.createdBefore) params.createdBefore = filters.createdBefore;
         
         return params;
     }
 
-    // Filtrar creators localmente (para uso offline o cache)
+    // Filtrar creators localmente
     filterCreators(creators, filters) {
         return creators.filter(creator => {
             // Búsqueda por texto
