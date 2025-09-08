@@ -33,6 +33,8 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    // ✅ SOLUCIÓN: Permitir todos los hosts para tunneling
+    allowedHosts: 'all',
     proxy: {
       '/api': {
         target: 'https://aidadigital.cl/wp-content/themes/salient',
