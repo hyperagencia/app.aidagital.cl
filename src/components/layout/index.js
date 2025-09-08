@@ -23,26 +23,22 @@ export const Sidebar = ({
     const menuItems = [
         { 
             id: 'dashboard', 
-            label: 'Dashboard', 
-            icon: '📊', 
+            label: 'Dashboard',             
             alwaysShow: true 
         },
         { 
             id: 'creators', 
-            label: 'Creators', 
-            icon: '👥', 
+            label: 'Creators',  
             alwaysShow: true 
         },
         { 
             id: 'brands', 
             label: 'Marcas', 
-            icon: '🏪', 
             requiresPermission: 'canViewBrands' 
         },
         { 
             id: 'users', 
             label: 'Usuarios', 
-            icon: '⚙️', 
             requiresPermission: 'canViewUsers' 
         },
     ];

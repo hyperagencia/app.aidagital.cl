@@ -21,7 +21,7 @@ export const SearchBar = ({ searchTerm, onSearchChange, placeholder = "Buscar po
                     className="pl-12 text-lg py-4"
                 />
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">
-                    🔍
+                    
                 </div>
             </div>
         </UI.Card>
@@ -312,7 +312,7 @@ export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand }) => {
                                         href="#"
                                         className="text-purple-600 hover:text-purple-700 text-sm font-medium"
                                     >
-                                        🔗 Ver
+                                        Ver
                                     </a>
                                 </div>
                             ))}
@@ -332,7 +332,7 @@ export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand }) => {
                             className="w-full"
                             onClick={() => onEdit?.(creator)}
                         >
-                            ✏️ Editar
+                            Editar
                         </UI.Button>
                         <UI.Button
                             variant="ghost"
@@ -340,7 +340,7 @@ export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand }) => {
                             className="w-full"
                             onClick={() => onAssignBrand?.(creator)}
                         >
-                            🏪 Asignar Marca
+                            Asignar Marca
                         </UI.Button>
                         <button
                             className="text-gray-400 hover:text-gray-600 text-sm w-full text-right"
