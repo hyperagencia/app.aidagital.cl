@@ -48,7 +48,7 @@
         const { useState, useEffect, createContext, useContext } = React;
 
         // Configuración de la API
-        const API_BASE = 'https://aidadigital.cl/wp-content/themes/salient/api';
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://aidadigital.cl/wp-content/themes/salient/api';
 
         // Context de autenticación
         const AuthContext = createContext();

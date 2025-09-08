@@ -19,9 +19,10 @@ class CreatorsService {
             log('Fetching creators with filters:', filters);
 
             // MODO DESARROLLO: Usar datos mock
-            if (this.isDevelopment) {
-                return await this.getMockCreators(filters);
-            }
+            // Solo usar mock si está específicamente habilitado
+if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
+    return await this.getMockCreators(filters);
+}
 
             // MODO PRODUCCIÓN: Usar API real
             const params = this.buildQueryParams(filters);
