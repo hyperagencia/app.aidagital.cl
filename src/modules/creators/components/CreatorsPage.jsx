@@ -18,6 +18,16 @@ export const CreatorsPage = () => {
     
     const filters = useCreatorFilters(creators);
 
+    // Manejar cambios de favoritos
+    const handleFavoriteChange = (creatorId, isFavorite) => {
+        // Opcionalmente, puedes refrescar la lista o actualizar localmente
+        // Para una experiencia más fluida, el estado ya se actualiza en CreatorCard
+        console.log(`Creator ${creatorId} favorite status changed to:`, isFavorite);
+        
+        // Si quieres refrescar la lista después de cambiar favoritos:
+        // refresh();
+    };
+
     return (
         <div className="flex-1 bg-gray-50 overflow-auto">
             <div className="p-8 max-w-7xl">
@@ -55,6 +65,7 @@ export const CreatorsPage = () => {
                         hasMore={hasMore}
                         onRefresh={refresh}
                         onLoadMore={loadMore}
+                        onFavoriteChange={handleFavoriteChange}
                     />
                 )}
             </div>

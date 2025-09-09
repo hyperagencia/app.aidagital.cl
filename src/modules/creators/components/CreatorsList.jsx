@@ -9,7 +9,8 @@ export const CreatorsList = ({
     error, 
     hasMore, 
     onRefresh, 
-    onLoadMore 
+    onLoadMore,
+    onFavoriteChange  
 }) => {
     if (loading) {
         return (
@@ -71,6 +72,7 @@ export const CreatorsList = ({
                     onEdit={(creator) => console.log('Edit creator:', creator)}
                     onDelete={(creator) => console.log('Delete creator:', creator)}
                     onAssignBrand={(creator) => console.log('Assign brand:', creator)}
+                    onFavoriteChange={onFavoriteChange}
                 />
             ))}
             

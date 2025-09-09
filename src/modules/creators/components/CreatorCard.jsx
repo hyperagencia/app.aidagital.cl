@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
 import { UI } from '../../../components/ui/index.js';
 import { formatters } from '../../../utils/formatters.js';
+import { useFavorites } from '../hooks/useFavorites.js';
 
-export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand }) => {
+export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand, onFavoriteChange }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(creator.is_favorite || false);
+    const { toggleFavorite, loading: favoriteLoading } = useFavorites();
+
+    const handleToggleFavorite = async () => {
+        const result = await toggleFavorite(creator.id, isFavorite);
+        
+        if (result.success) {
+            setIsFavorite(result.isFavorite);
+            // Notificar al componente padre si existe la función
+            onFavoriteChange?.(creator.id, result.isFavorite);
+        }
+        // El error se maneja automáticamente por el hook useFavorites
+    };
 
     return (
         <UI.Card hover className="transition-all duration-200">
@@ -17,12 +31,36 @@ export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand }) => {
                         />
                         
                         <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                {creator.full_name}
-                            </h3>
-                            <p className="text-gray-600 text-sm">
-                                {creator.age} años, {formatters.formatNationality(creator.nationality)}
-                            </p>
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                        {creator.full_name}
+                                    </h3>
+                                    <p className="text-gray-600 text-sm">
+                                        {creator.age} años, {formatters.formatNationality(creator.nationality)}
+                                    </p>
+                                </div>
+                                
+                                {/* Botón de favorito */}
+                                <button
+                                    onClick={handleToggleFavorite}
+                                    disabled={favoriteLoading}
+                                    className={`ml-2 p-2 rounded-full transition-colors ${
+                                        isFavorite 
+                                            ? 'text-red-500 hover:text-red-600 bg-red-50' 
+                                            : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                                    } ${favoriteLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                                >
+                                    {favoriteLoading ? (
+                                        <UI.Spinner size="sm" />
+                                    ) : (
+                                        <span className="text-xl">
+                                            {isFavorite ? '❤️' : '🤍'}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     

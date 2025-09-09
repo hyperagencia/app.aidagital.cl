@@ -9,6 +9,8 @@ import { config, log } from '../../../services/config.js';
 
 // Hook principal para obtener creators
 // Hook principal para obtener creators con paginación
+// Al inicio del archivo hooks/index.js, agregar:
+export { useFavorites } from './useFavorites.js';
 export const useCreators = (initialFilters = {}) => {
     const [creators, setCreators] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -566,3 +568,4 @@ export const creatorsHooks = {
 };
 
 export default creatorsHooks;
+
