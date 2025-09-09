@@ -1,15 +1,16 @@
 import React from 'react';
 
-export const Input = ({
+export const Select = ({
     label,
     error,
     helper,
     required = false,
+    children,
     className = '',
     containerClassName = '',
     ...props
 }) => {
-    const inputClasses = `input-base ${error ? 'error-state' : ''} ${className}`;
+    const selectClasses = `input-base ${error ? 'error-state' : ''} ${className}`;
     
     return (
         <div className={`space-y-2 ${containerClassName}`}>
@@ -19,10 +20,12 @@ export const Input = ({
                     {required && <span className="text-red-500 ml-1">*</span>}
                 </label>
             )}
-            <input
-                className={inputClasses}
+            <select
+                className={selectClasses}
                 {...props}
-            />
+            >
+                {children}
+            </select>
             {error && (
                 <p className="error-text">{error}</p>
             )}

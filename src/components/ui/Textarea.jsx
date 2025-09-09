@@ -1,15 +1,16 @@
 import React from 'react';
 
-export const Input = ({
+export const Textarea = ({
     label,
     error,
     helper,
     required = false,
     className = '',
     containerClassName = '',
+    rows = 3,
     ...props
 }) => {
-    const inputClasses = `input-base ${error ? 'error-state' : ''} ${className}`;
+    const textareaClasses = `input-base resize-none ${error ? 'error-state' : ''} ${className}`;
     
     return (
         <div className={`space-y-2 ${containerClassName}`}>
@@ -19,8 +20,9 @@ export const Input = ({
                     {required && <span className="text-red-500 ml-1">*</span>}
                 </label>
             )}
-            <input
-                className={inputClasses}
+            <textarea
+                rows={rows}
+                className={textareaClasses}
                 {...props}
             />
             {error && (

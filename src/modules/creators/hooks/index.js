@@ -8,64 +8,140 @@ import { creatorsService } from '../services/creatorsService.js';
 import { config, log } from '../../../services/config.js';
 
 // Hook principal para obtener creators
+// Hook principal para obtener creators con paginación
 export const useCreators = (initialFilters = {}) => {
     const [creators, setCreators] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState(null);
     const [pagination, setPagination] = useState(null);
     const [filters, setFilters] = useState(initialFilters);
+    const [hasMore, setHasMore] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    // Función para cargar creators
-    const fetchCreators = useCallback(async (newFilters = filters) => {
+    // Función para cargar creators (inicial o nueva búsqueda)
+    const fetchCreators = useCallback(async (newFilters = filters, reset = true) => {
         try {
-            setLoading(true);
+            if (reset) {
+                setLoading(true);
+                setCurrentPage(1);
+            }
             setError(null);
             
-            const result = await creatorsService.getCreators(newFilters);
+            const queryFilters = {
+                ...newFilters,
+                page: reset ? 1 : currentPage,
+                limit: 20
+            };
+            
+            const result = await creatorsService.getCreators(queryFilters);
             
             if (result.success) {
-                setCreators(result.creators);
+                if (reset) {
+                    setCreators(result.creators);
+                } else {
+                    setCreators(prev => [...prev, ...result.creators]);
+                }
+                
                 setPagination(result.pagination);
-                log(`Loaded ${result.creators.length} creators`);
+                
+                // Determinar si hay más páginas
+                if (result.pagination) {
+                    setHasMore(result.pagination.page < result.pagination.pages);
+                } else {
+                    // Si no hay paginación, asumir que no hay más
+                    setHasMore(false);
+                }
+                
+                log(`Loaded ${result.creators.length} creators (page ${queryFilters.page})`);
             }
         } catch (error) {
             setError(error.message);
             log('Error loading creators:', error.message);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
-    }, [filters]);
+    }, [filters, currentPage]);
+
+    // Función para cargar más creators
+    const loadMore = useCallback(async () => {
+        if (!hasMore || loadingMore) return;
+        
+        try {
+            setLoadingMore(true);
+            setError(null);
+            
+            const nextPage = currentPage + 1;
+            setCurrentPage(nextPage);
+            
+            const queryFilters = {
+                ...filters,
+                page: nextPage,
+                limit: 20
+            };
+            
+            const result = await creatorsService.getCreators(queryFilters);
+            
+            if (result.success) {
+                setCreators(prev => [...prev, ...result.creators]);
+                setPagination(result.pagination);
+                
+                // Verificar si hay más páginas
+                if (result.pagination) {
+                    setHasMore(nextPage < result.pagination.pages);
+                } else {
+                    setHasMore(false);
+                }
+                
+                log(`Loaded ${result.creators.length} more creators (page ${nextPage})`);
+            }
+        } catch (error) {
+            setError(error.message);
+            log('Error loading more creators:', error.message);
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [filters, currentPage, hasMore, loadingMore]);
 
     // Cargar creators al montar o cambiar filtros
     useEffect(() => {
-        fetchCreators();
-    }, [fetchCreators]);
+        fetchCreators(filters, true);
+    }, [JSON.stringify(filters)]); // Usar JSON.stringify para comparación profunda
 
     // Función para actualizar filtros
     const updateFilters = useCallback((newFilters) => {
         setFilters(prev => ({ ...prev, ...newFilters }));
+        setCurrentPage(1);
+        setHasMore(true);
     }, []);
 
     // Función para limpiar filtros
     const clearFilters = useCallback(() => {
         setFilters({});
+        setCurrentPage(1);
+        setHasMore(true);
     }, []);
 
     // Función para refrescar datos
     const refresh = useCallback(() => {
-        fetchCreators();
-    }, [fetchCreators]);
+        fetchCreators(filters, true);
+    }, [fetchCreators, filters]);
 
     return {
         creators,
         loading,
+        loadingMore,
         error,
         pagination,
         filters,
+        hasMore,
+        currentPage,
         updateFilters,
         clearFilters,
         refresh,
         fetchCreators,
+        loadMore,
     };
 };
 
