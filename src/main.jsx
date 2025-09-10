@@ -296,12 +296,19 @@ const checkBrowserCompatibility = () => {
         throw new Error(`Browser not supported. Missing features: ${missingFeatures.join(', ')}`);
     }
     
-    // Verificar versión de ES6+
+    // Verificación de ES6+ sin eval (más segura)
+const checkES6Support = () => {
     try {
-        eval('const test = () => {}; class Test {}');
+        // Verificar características específicas sin eval
+        if (typeof Symbol === 'undefined' || 
+            typeof Promise === 'undefined' ||
+            typeof Map === 'undefined') {
+            throw new Error('Browser does not support ES6+ features');
+        }
     } catch (e) {
         throw new Error('Browser does not support ES6+ features');
     }
+};
 };
 
 // Función principal
