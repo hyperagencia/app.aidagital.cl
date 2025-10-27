@@ -1,11 +1,17 @@
+/**
+ * Página de Creators
+ * MODIFICADA para usar hooks separados con búsqueda global
+ */
+
 import React from 'react';
-import { useCreators, useCreatorFilters } from '../hooks/index.js';
+import { useCreators } from '../hooks/index.js';
 import { SearchBar } from './SearchBar.jsx';
 import { CreatorFilters } from './CreatorFilters.jsx';
 import { CreatorsList } from './CreatorsList.jsx';
 import { EmptyState } from './EmptyState.jsx';
 
 export const CreatorsPage = () => {
+    // ✅ Hook principal con búsqueda global
     const { 
         creators, 
         loading, 
@@ -13,19 +19,20 @@ export const CreatorsPage = () => {
         error, 
         hasMore, 
         refresh, 
-        loadMore 
+        loadMore,
+        searchTerm,     // ✅ Término de búsqueda del hook
+        updateSearch    // ✅ Función para actualizar búsqueda
     } = useCreators();
-    
-    const filters = useCreatorFilters(creators);
 
     // Manejar cambios de favoritos
     const handleFavoriteChange = (creatorId, isFavorite) => {
-        // Opcionalmente, puedes refrescar la lista o actualizar localmente
-        // Para una experiencia más fluida, el estado ya se actualiza en CreatorCard
         console.log(`Creator ${creatorId} favorite status changed to:`, isFavorite);
-        
-        // Si quieres refrescar la lista después de cambiar favoritos:
-        // refresh();
+        // Opcional: refresh() para recargar la lista
+    };
+
+    // ✅ Función para limpiar búsqueda
+    const handleClearSearch = () => {
+        updateSearch('');
     };
 
     return (
@@ -41,24 +48,44 @@ export const CreatorsPage = () => {
                     </p>
                 </div>
 
-                {/* Búsqueda */}
+                {/* ✅ MODIFICADO: Búsqueda conectada con el backend */}
                 <SearchBar
-                    searchTerm={filters.searchTerm}
-                    onSearchChange={filters.setSearchTerm}
+                    searchTerm={searchTerm}
+                    onSearchChange={updateSearch}
+                    placeholder="Buscar por nombre o email en toda la base de datos..."
                 />
 
-                {/* Filtros */}
-                <CreatorFilters filters={filters} />
+                {/* ✅ NUEVO: Indicador visual de búsqueda activa */}
+                {searchTerm && (
+                    <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <span className="text-purple-700 font-medium">
+                                    🔍 Buscando: "{searchTerm}"
+                                </span>
+                                <span className="text-purple-600 text-sm">
+                                    {loading ? 'Buscando...' : `${creators.length} resultado(s)`}
+                                </span>
+                            </div>
+                            <button
+                                onClick={handleClearSearch}
+                                className="text-purple-600 hover:text-purple-800 text-sm font-medium transition-colors"
+                            >
+                                Limpiar búsqueda ✕
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Lista de creators */}
-                {filters.filteredCreators.length === 0 && !loading ? (
+                {creators.length === 0 && !loading ? (
                     <EmptyState 
-                        hasFilters={filters.hasActiveFilters}
-                        onClearFilters={filters.clearFilters}
+                        hasFilters={!!searchTerm}
+                        onClearFilters={handleClearSearch}
                     />
                 ) : (
                     <CreatorsList
-                        creators={filters.filteredCreators}
+                        creators={creators}
                         loading={loading}
                         loadingMore={loadingMore}
                         error={error}

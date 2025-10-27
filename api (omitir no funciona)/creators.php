@@ -59,32 +59,83 @@ class CreatorAPI {
         
         // ✅ NUEVO: Filtro de favoritos
         $onlyFavorites = isset($_GET['favorites']) && $_GET['favorites'] === 'true';
-        
+
         // Filtros
         $filters = [];
         $params = [];
-        
+
+        // ✅ Filtro de búsqueda por texto (nombre o email)
+        if (!empty($_GET['search'])) {
+            $searchTerm = '%' . $_GET['search'] . '%';
+            $filters[] = "(c.full_name LIKE ? OR c.email LIKE ?)";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
         // ✅ Filtro de solo favoritos
         if ($onlyFavorites) {
             $filters[] = "EXISTS (SELECT 1 FROM creator_favorites cf WHERE cf.creator_id = c.id AND cf.user_id = ?)";
             $params[] = $userId;
         }
-        
+
         if (!empty($_GET['nationality'])) {
             $filters[] = "c.nationality = ?";
             $params[] = $_GET['nationality'];
         }
-        
+
         if (!empty($_GET['location'])) {
             $filters[] = "c.location = ?";
             $params[] = $_GET['location'];
         }
-        
+
+        // ✅ Filtro por modalidad
+        if (!empty($_GET['modality'])) {
+            $filters[] = "c.modality = ?";
+            $params[] = $_GET['modality'];
+        }
+
+        // ✅ Filtro por plataforma individual (compatibilidad)
         if (!empty($_GET['platform'])) {
             $filters[] = "EXISTS (SELECT 1 FROM creator_social_networks csn WHERE csn.creator_id = c.id AND csn.platform = ?)";
             $params[] = $_GET['platform'];
         }
-        
+
+        // ✅ Filtro por múltiples plataformas (nuevo)
+        if (!empty($_GET['platforms'])) {
+            $platformsList = explode(',', $_GET['platforms']);
+            $platformPlaceholders = implode(',', array_fill(0, count($platformsList), '?'));
+            $filters[] = "EXISTS (SELECT 1 FROM creator_social_networks csn WHERE csn.creator_id = c.id AND csn.platform IN ($platformPlaceholders))";
+            foreach ($platformsList as $platform) {
+                $params[] = trim($platform);
+            }
+        }
+
+        // ✅ Filtro por múltiples intereses (nuevo)
+        if (!empty($_GET['interests'])) {
+            $interestsList = explode(',', $_GET['interests']);
+            $interestPlaceholders = implode(',', array_fill(0, count($interestsList), '?'));
+            $filters[] = "EXISTS (SELECT 1 FROM creator_interests ci2 WHERE ci2.creator_id = c.id AND ci2.interest IN ($interestPlaceholders))";
+            foreach ($interestsList as $interest) {
+                $params[] = trim($interest);
+            }
+        }
+
+        // ✅ Filtro por rango de edad (actualizado para usar ageMin y ageMax)
+        if (!empty($_GET['ageMin']) || !empty($_GET['ageMax'])) {
+            $currentYear = date('Y');
+            if (!empty($_GET['ageMin'])) {
+                $maxBirthYear = $currentYear - (int)$_GET['ageMin'];
+                $filters[] = "c.birth_year <= ?";
+                $params[] = $maxBirthYear;
+            }
+            if (!empty($_GET['ageMax'])) {
+                $minBirthYear = $currentYear - (int)$_GET['ageMax'];
+                $filters[] = "c.birth_year >= ?";
+                $params[] = $minBirthYear;
+            }
+        }
+
+        // Compatibilidad con nombres antiguos de filtros de edad
         if (!empty($_GET['min_age']) || !empty($_GET['max_age'])) {
             $currentYear = date('Y');
             if (!empty($_GET['min_age'])) {
@@ -185,7 +236,15 @@ class CreatorAPI {
                 'total' => (int)$total,
                 'pages' => isset($_GET['limit']) && $_GET['limit'] === 'all' ? 1 : ceil($total / $limit),
                 'filters_applied' => [
-                    'favorites_only' => $onlyFavorites
+                    'search' => $_GET['search'] ?? null,
+                    'favorites_only' => $onlyFavorites,
+                    'nationality' => $_GET['nationality'] ?? null,
+                    'location' => $_GET['location'] ?? null,
+                    'modality' => $_GET['modality'] ?? null,
+                    'platforms' => $_GET['platforms'] ?? null,
+                    'interests' => $_GET['interests'] ?? null,
+                    'ageMin' => $_GET['ageMin'] ?? null,
+                    'ageMax' => $_GET['ageMax'] ?? null,
                 ]
             ]
         ], 200, 'Creators obtenidos exitosamente');

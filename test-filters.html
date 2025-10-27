@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Filtros - Creators API</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left-color: #28a745;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .url {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Filtros - Creators API</h1>
+
+    <div class="test-section">
+        <h2>Test 1: Sin Filtros (20 primeros)</h2>
+        <button class="test-button" onclick="testNoFilters()">Ejecutar Test</button>
+        <div id="result1" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Búsqueda por Texto</h2>
+        <input type="text" id="searchInput" placeholder="Ej: maria" style="padding: 8px; width: 300px;">
+        <button class="test-button" onclick="testSearch()">Buscar</button>
+        <div id="result2" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Filtro por Intereses</h2>
+        <button class="test-button" onclick="testInterests('moda')">Moda</button>
+        <button class="test-button" onclick="testInterests('tecnologia')">Tecnología</button>
+        <button class="test-button" onclick="testInterests('moda,belleza,lifestyle')">Moda + Belleza + Lifestyle</button>
+        <div id="result3" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Filtro por Plataformas</h2>
+        <button class="test-button" onclick="testPlatforms('instagram')">Instagram</button>
+        <button class="test-button" onclick="testPlatforms('tiktok')">TikTok</button>
+        <button class="test-button" onclick="testPlatforms('instagram,tiktok,youtube')">Instagram + TikTok + YouTube</button>
+        <div id="result4" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 5: Filtro por Ubicación y Nacionalidad</h2>
+        <button class="test-button" onclick="testLocation('santiago', 'chilena')">Santiago + Chilenos</button>
+        <button class="test-button" onclick="testLocation('valparaiso', null)">Valparaíso</button>
+        <button class="test-button" onclick="testLocation(null, 'extranjera')">Extranjeros</button>
+        <div id="result5" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 6: Filtro por Rango de Edad</h2>
+        <button class="test-button" onclick="testAge(18, 25)">18-25 años</button>
+        <button class="test-button" onclick="testAge(26, 35)">26-35 años</button>
+        <button class="test-button" onclick="testAge(18, null)">Mayores de 18</button>
+        <div id="result6" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 7: Filtro por Modalidad</h2>
+        <button class="test-button" onclick="testModality('remoto')">Remoto</button>
+        <button class="test-button" onclick="testModality('presencial')">Presencial</button>
+        <button class="test-button" onclick="testModality('hibrido')">Híbrido</button>
+        <div id="result7" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 8: Filtros Combinados</h2>
+        <button class="test-button" onclick="testCombined()">
+            Moda + Instagram + Santiago + 18-30 años
+        </button>
+        <div id="result8" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 9: Paginación</h2>
+        <button class="test-button" onclick="testPagination(1)">Página 1</button>
+        <button class="test-button" onclick="testPagination(2)">Página 2</button>
+        <button class="test-button" onclick="testPagination(3)">Página 3</button>
+        <div id="result9" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://aidadigital.cl/wp-content/themes/salient/api';
+
+        async function callAPI(endpoint, resultId) {
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="loading"></div> Cargando...';
+
+            const url = `${API_BASE}${endpoint}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = `
+                        <div class="stats">
+                            <div class="stat-box">
+                                <div class="stat-value">${data.data.creators.length}</div>
+                                <div class="stat-label">Resultados</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${data.data.pagination.total}</div>
+                                <div class="stat-label">Total en DB</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${data.data.pagination.page}/${data.data.pagination.pages}</div>
+                                <div class="stat-label">Página</div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <div class="url"><strong>URL:</strong> ${url}</div>
+                        ${stats}
+                        <strong>Filtros Aplicados:</strong>
+                        <pre>${JSON.stringify(data.data.pagination.filters_applied, null, 2)}</pre>
+                        <strong>Primeros 3 resultados:</strong>
+                        <pre>${JSON.stringify(data.data.creators.slice(0, 3), null, 2)}</pre>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Error desconocido');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <div class="url"><strong>URL:</strong> ${url}</div>
+                    <strong>❌ Error:</strong> ${error.message}
+                `;
+            }
+        }
+
+        function testNoFilters() {
+            callAPI('/creators.php?page=1&limit=20', 'result1');
+        }
+
+        function testSearch() {
+            const search = document.getElementById('searchInput').value;
+            if (!search) {
+                alert('Por favor ingresa un término de búsqueda');
+                return;
+            }
+            callAPI(`/creators.php?search=${encodeURIComponent(search)}`, 'result2');
+        }
+
+        function testInterests(interests) {
+            callAPI(`/creators.php?interests=${encodeURIComponent(interests)}`, 'result3');
+        }
+
+        function testPlatforms(platforms) {
+            callAPI(`/creators.php?platforms=${encodeURIComponent(platforms)}`, 'result4');
+        }
+
+        function testLocation(location, nationality) {
+            let params = [];
+            if (location) params.push(`location=${location}`);
+            if (nationality) params.push(`nationality=${nationality}`);
+            callAPI(`/creators.php?${params.join('&')}`, 'result5');
+        }
+
+        function testAge(min, max) {
+            let params = [];
+            if (min) params.push(`ageMin=${min}`);
+            if (max) params.push(`ageMax=${max}`);
+            callAPI(`/creators.php?${params.join('&')}`, 'result6');
+        }
+
+        function testModality(modality) {
+            callAPI(`/creators.php?modality=${modality}`, 'result7');
+        }
+
+        function testCombined() {
+            callAPI('/creators.php?interests=moda&platforms=instagram&location=santiago&ageMin=18&ageMax=30', 'result8');
+        }
+
+        function testPagination(page) {
+            callAPI(`/creators.php?page=${page}&limit=10`, 'result9');
+        }
+    </script>
+</body>
+</html>

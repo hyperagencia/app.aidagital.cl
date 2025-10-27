@@ -281,12 +281,15 @@ if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
     // Construir parámetros de consulta
     buildQueryParams(filters) {
         const params = {};
-        
+
         if (filters.page) params.page = filters.page;
         if (filters.limit) params.limit = filters.limit;
         if (filters.sortBy) params.sortBy = filters.sortBy;
         if (filters.sortOrder) params.sortOrder = filters.sortOrder;
-        
+
+        // Término de búsqueda
+        if (filters.searchTerm) params.search = filters.searchTerm;
+
         if (filters.interests && filters.interests.length > 0) {
             params.interests = filters.interests.join(',');
         }
@@ -298,7 +301,7 @@ if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
         if (filters.modality) params.modality = filters.modality;
         if (filters.ageMin) params.ageMin = filters.ageMin;
         if (filters.ageMax) params.ageMax = filters.ageMax;
-        
+
         return params;
     }
 
