@@ -26,7 +26,21 @@ if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
 
             // MODO PRODUCCIÓN: Usar API real
             const params = this.buildQueryParams(filters);
+
+            // ✅ DEBUGGING: Log detallado de parámetros
+            log('🔍 API Request Details:');
+            log('  - Endpoint:', this.baseEndpoint);
+            log('  - Params object:', params);
+            log('  - URL completa:', `${config.API_BASE}${this.baseEndpoint}?${new URLSearchParams(params).toString()}`);
+
             const response = await api.get(this.baseEndpoint, params);
+
+            // ✅ DEBUGGING: Log detallado de respuesta
+            log('📥 API Response:');
+            log('  - Success:', response.success);
+            log('  - Total creators en respuesta:', response.data?.creators?.length || 0);
+            log('  - Total en BD:', response.data?.total);
+            log('  - Pagination:', response.data?.pagination);
 
             if (response.success) {
                 log(`Fetched ${response.data.creators.length} creators`);
@@ -288,7 +302,7 @@ if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
         if (filters.sortOrder) params.sortOrder = filters.sortOrder;
 
         // Término de búsqueda
-        if (filters.searchTerm) params.search = filters.searchTerm;
+        if (filters.search) params.search = filters.search;
 
         if (filters.interests && filters.interests.length > 0) {
             params.interests = filters.interests.join(',');
@@ -309,8 +323,8 @@ if (import.meta.env.VITE_USE_MOCK_DATA === 'true') {
     filterCreators(creators, filters) {
         return creators.filter(creator => {
             // Búsqueda por texto
-            if (filters.searchTerm) {
-                const searchLower = filters.searchTerm.toLowerCase();
+            if (filters.search) {
+                const searchLower = filters.search.toLowerCase();
                 const matchName = creator.full_name?.toLowerCase().includes(searchLower);
                 const matchEmail = creator.email?.toLowerCase().includes(searchLower);
                 if (!matchName && !matchEmail) return false;

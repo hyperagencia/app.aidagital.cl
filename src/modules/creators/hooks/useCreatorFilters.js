@@ -11,7 +11,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
  * para enviar los filtros al servidor
  */
 export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
-    const [searchTerm, setSearchTerm] = useState('');
+    // ✅ Removido searchTerm - se maneja directamente en useCreators
     const [selectedInterests, setSelectedInterests] = useState([]);
     const [selectedPlatforms, setSelectedPlatforms] = useState([]);
     const [ageRange, setAgeRange] = useState({ min: '', max: '' });
@@ -33,7 +33,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
     // Actualizar filtros en el servidor cuando cambian los valores
     useEffect(() => {
         const filters = {
-            searchTerm: searchTerm || undefined,
+            // ✅ searchTerm removido - se maneja en useCreators directamente
             interests: selectedInterests.length > 0 ? selectedInterests : undefined,
             platforms: selectedPlatforms.length > 0 ? selectedPlatforms : undefined,
             ageMin: ageRange.min || undefined,
@@ -50,7 +50,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
 
         updateFilters(cleanFilters);
     }, [
-        searchTerm,
+        // ✅ searchTerm removido de las dependencias
         selectedInterests,
         selectedPlatforms,
         ageRange,
@@ -78,7 +78,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
     }, []);
 
     const clearFilters = useCallback(() => {
-        setSearchTerm('');
+        // ✅ searchTerm removido - se maneja en useCreators
         setSelectedInterests([]);
         setSelectedPlatforms([]);
         setAgeRange({ min: '', max: '' });
@@ -94,8 +94,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
 
     // Verificar si hay filtros activos
     const hasActiveFilters = useMemo(() => {
-        return searchTerm ||
-               selectedInterests.length > 0 ||
+        return selectedInterests.length > 0 ||
                selectedPlatforms.length > 0 ||
                ageRange.min ||
                ageRange.max ||
@@ -103,7 +102,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
                selectedLocation ||
                selectedModality;
     }, [
-        searchTerm,
+        // ✅ searchTerm removido de las dependencias
         selectedInterests,
         selectedPlatforms,
         ageRange,
@@ -113,8 +112,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
     ]);
 
     return {
-        // Estados
-        searchTerm,
+        // Estados (searchTerm removido)
         selectedInterests,
         selectedPlatforms,
         ageRange,
@@ -122,8 +120,7 @@ export const useCreatorFilters = (updateFilters, clearFiltersCallback) => {
         selectedLocation,
         selectedModality,
 
-        // Setters
-        setSearchTerm,
+        // Setters (setSearchTerm removido)
         setSelectedInterests,
         setSelectedPlatforms,
         setAgeRange,

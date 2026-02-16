@@ -37,7 +37,7 @@ export const CreatorCard = ({ creator, onEdit, onDelete, onAssignBrand, onFavori
                                         {creator.full_name}
                                     </h3>
                                     <p className="text-gray-600 text-sm">
-                                        {creator.age} años, {formatters.formatNationality(creator.nationality)}
+                                        {creator.age ? `${creator.age} años` : 'Edad no especificada'}, {formatters.formatNationality(creator.nationality)}
                                     </p>
                                 </div>
                                 

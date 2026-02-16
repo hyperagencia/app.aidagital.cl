@@ -28,7 +28,7 @@ export const config = {
     
     // UI Configuration
     DEBOUNCE_DELAY: 300,
-    PAGINATION_SIZE: 25,
+    PAGINATION_SIZE: 50, // Aumentado de 25 a 50 para mostrar más creators
     
     // File Upload
     MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB

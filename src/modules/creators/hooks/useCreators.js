@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { creatorsService } from '../services/creatorsService.js';
-import { log } from '../../../services/config.js';
+import { config, log } from '../../../services/config.js';
 
 /**
  * Hook para obtener y gestionar creators
@@ -25,6 +25,7 @@ export const useCreators = (initialFilters = {}) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const debounceTimeout = useRef(null);
+    const fetchCreatorsRef = useRef(null);
 
     // ✅ NUEVO: Efecto para implementar debounce en la búsqueda
     useEffect(() => {
@@ -48,7 +49,7 @@ export const useCreators = (initialFilters = {}) => {
     }, [searchTerm]);
 
     // Función para cargar creators (inicial o nueva búsqueda)
-    const fetchCreators = useCallback(async (newFilters = filters, reset = true) => {
+    const fetchCreators = useCallback(async (reset = true, pageOverride = null) => {
         try {
             if (reset) {
                 setLoading(true);
@@ -58,11 +59,14 @@ export const useCreators = (initialFilters = {}) => {
             }
             setError(null);
 
+            // ✅ MODIFICADO: Usar pageOverride si se proporciona, sino usar currentPage
+            const pageToFetch = pageOverride !== null ? pageOverride : (reset ? 1 : currentPage);
+
             // ✅ MODIFICADO: Incluir término de búsqueda en los filtros
             const queryFilters = {
-                ...newFilters,
-                page: reset ? 1 : currentPage,
-                limit: 20,
+                ...filters,
+                page: pageToFetch,
+                limit: config.PAGINATION_SIZE, // ✅ Usar configuración centralizada (50 creators por página)
                 search: debouncedSearch.trim() || undefined // ✅ Agregar búsqueda
             };
 
@@ -100,7 +104,12 @@ export const useCreators = (initialFilters = {}) => {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [filters, currentPage, debouncedSearch]);
+    }, [filters, debouncedSearch]);
+
+    // Mantener referencia actualizada de fetchCreators para loadMore
+    useEffect(() => {
+        fetchCreatorsRef.current = fetchCreators;
+    }, [fetchCreators]);
 
     // Función para cargar más creators
     const loadMore = useCallback(async () => {
@@ -110,18 +119,21 @@ export const useCreators = (initialFilters = {}) => {
             const nextPage = currentPage + 1;
             setCurrentPage(nextPage);
 
-            // Usar fetchCreators con reset=false para agregar a la lista existente
-            await fetchCreators(filters, false);
+            // ✅ FIX: Usar ref para siempre tener la versión más reciente de fetchCreators
+            await fetchCreatorsRef.current(false, nextPage);
         } catch (error) {
             setError(error.message);
             log('Error loading more creators:', error.message);
         }
-    }, [filters, currentPage, hasMore, loadingMore, fetchCreators]);
+    }, [currentPage, hasMore, loadingMore]);
 
     // ✅ MODIFICADO: Cargar creators cuando cambie búsqueda debounced o filtros
+    // Usar un efecto separado que se ejecute cuando cambien los filtros o la búsqueda
     useEffect(() => {
-        fetchCreators(filters, true);
-    }, [debouncedSearch, JSON.stringify(filters)]);
+        log('Filters or search changed, fetching creators...', { filters, debouncedSearch });
+        fetchCreators(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters, debouncedSearch]);
 
     // Función para actualizar filtros
     const updateFilters = useCallback((newFilters) => {
@@ -147,8 +159,8 @@ export const useCreators = (initialFilters = {}) => {
 
     // Función para refrescar datos
     const refresh = useCallback(() => {
-        fetchCreators(filters, true);
-    }, [fetchCreators, filters]);
+        fetchCreators(true);
+    }, [fetchCreators]);
 
     return {
         creators,

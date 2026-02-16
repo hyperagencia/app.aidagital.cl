@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { useCreators } from '../hooks/index.js';
+import { useCreators, useCreatorFilters } from '../hooks/index.js';
 import { SearchBar } from './SearchBar.jsx';
 import { CreatorFilters } from './CreatorFilters.jsx';
 import { CreatorsList } from './CreatorsList.jsx';
@@ -12,17 +12,23 @@ import { EmptyState } from './EmptyState.jsx';
 
 export const CreatorsPage = () => {
     // ✅ Hook principal con búsqueda global
-    const { 
-        creators, 
-        loading, 
-        loadingMore, 
-        error, 
-        hasMore, 
-        refresh, 
+    const {
+        creators,
+        loading,
+        loadingMore,
+        error,
+        pagination,     // ✅ Datos de paginación (total, page, pages)
+        hasMore,
+        refresh,
         loadMore,
         searchTerm,     // ✅ Término de búsqueda del hook
-        updateSearch    // ✅ Función para actualizar búsqueda
+        updateSearch,   // ✅ Función para actualizar búsqueda
+        updateFilters,  // ✅ Función para actualizar filtros
+        clearFilters: clearAllFilters // ✅ Función para limpiar filtros
     } = useCreators();
+
+    // ✅ Hook para manejar filtros avanzados
+    const filters = useCreatorFilters(updateFilters, clearAllFilters);
 
     // Manejar cambios de favoritos
     const handleFavoriteChange = (creatorId, isFavorite) => {
@@ -55,23 +61,46 @@ export const CreatorsPage = () => {
                     placeholder="Buscar por nombre o email en toda la base de datos..."
                 />
 
-                {/* ✅ NUEVO: Indicador visual de búsqueda activa */}
-                {searchTerm && (
+                {/* ✅ Filtros avanzados: edad, intereses, plataforma, nacionalidad */}
+                <CreatorFilters
+                    filters={{
+                        ...filters,
+                        totalCreators: creators.length,
+                        filteredCount: creators.length
+                    }}
+                />
+
+                {/* ✅ Indicador visual de búsqueda/filtros activos */}
+                {(searchTerm || filters.hasActiveFilters) && (
                     <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                                <span className="text-purple-700 font-medium">
-                                    🔍 Buscando: "{searchTerm}"
-                                </span>
+                                {searchTerm && (
+                                    <span className="text-purple-700 font-medium">
+                                        🔍 Buscando: "{searchTerm}"
+                                    </span>
+                                )}
+                                {filters.hasActiveFilters && (
+                                    <span className="text-purple-700 font-medium">
+                                        {searchTerm ? '|' : '🎯'} Filtros aplicados
+                                    </span>
+                                )}
                                 <span className="text-purple-600 text-sm">
-                                    {loading ? 'Buscando...' : `${creators.length} resultado(s)`}
+                                    {loading ? 'Buscando...' :
+                                     pagination?.total
+                                        ? `${pagination.total} resultado(s) total, mostrando ${creators.length}`
+                                        : `${creators.length} resultado(s)`
+                                    }
                                 </span>
                             </div>
                             <button
-                                onClick={handleClearSearch}
+                                onClick={() => {
+                                    handleClearSearch();
+                                    filters.clearFilters();
+                                }}
                                 className="text-purple-600 hover:text-purple-800 text-sm font-medium transition-colors"
                             >
-                                Limpiar búsqueda ✕
+                                Limpiar todo ✕
                             </button>
                         </div>
                     </div>
@@ -79,9 +108,12 @@ export const CreatorsPage = () => {
 
                 {/* Lista de creators */}
                 {creators.length === 0 && !loading ? (
-                    <EmptyState 
-                        hasFilters={!!searchTerm}
-                        onClearFilters={handleClearSearch}
+                    <EmptyState
+                        hasFilters={!!searchTerm || filters.hasActiveFilters}
+                        onClearFilters={() => {
+                            handleClearSearch();
+                            filters.clearFilters();
+                        }}
                     />
                 ) : (
                     <CreatorsList
