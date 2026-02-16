@@ -1,16 +1,22 @@
 /**
  * Página de Creators
  * MODIFICADA para usar hooks separados con búsqueda global
+ * Incluye toggle entre vista Grid (Cards) y Tabla
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useCreators, useCreatorFilters } from '../hooks/index.js';
 import { SearchBar } from './SearchBar.jsx';
 import { CreatorFilters } from './CreatorFilters.jsx';
 import { CreatorsList } from './CreatorsList.jsx';
+import { CreatorsTable } from './CreatorsTable.jsx';
+import { ViewToggle } from './ViewToggle.jsx';
 import { EmptyState } from './EmptyState.jsx';
 
 export const CreatorsPage = () => {
+    // ✅ Estado de vista (grid o table) - Siempre empieza en 'grid'
+    const [viewType, setViewType] = useState('grid');
+
     // ✅ Hook principal con búsqueda global
     const {
         creators,
@@ -54,12 +60,17 @@ export const CreatorsPage = () => {
                     </p>
                 </div>
 
-                {/* ✅ MODIFICADO: Búsqueda conectada con el backend */}
-                <SearchBar
-                    searchTerm={searchTerm}
-                    onSearchChange={updateSearch}
-                    placeholder="Buscar por nombre o email en toda la base de datos..."
-                />
+                {/* ✅ MODIFICADO: Búsqueda conectada con el backend + Toggle de vistas */}
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="flex-1">
+                        <SearchBar
+                            searchTerm={searchTerm}
+                            onSearchChange={updateSearch}
+                            placeholder="Buscar por nombre o email en toda la base de datos..."
+                        />
+                    </div>
+                    <ViewToggle viewType={viewType} onViewChange={setViewType} />
+                </div>
 
                 {/* ✅ Filtros avanzados: edad, intereses, plataforma, nacionalidad */}
                 <CreatorFilters
@@ -106,7 +117,7 @@ export const CreatorsPage = () => {
                     </div>
                 )}
 
-                {/* Lista de creators */}
+                {/* ✅ MODIFICADO: Renderizar condicionalmente según viewType */}
                 {creators.length === 0 && !loading ? (
                     <EmptyState
                         hasFilters={!!searchTerm || filters.hasActiveFilters}
@@ -116,16 +127,29 @@ export const CreatorsPage = () => {
                         }}
                     />
                 ) : (
-                    <CreatorsList
-                        creators={creators}
-                        loading={loading}
-                        loadingMore={loadingMore}
-                        error={error}
-                        hasMore={hasMore}
-                        onRefresh={refresh}
-                        onLoadMore={loadMore}
-                        onFavoriteChange={handleFavoriteChange}
-                    />
+                    viewType === 'grid' ? (
+                        <CreatorsList
+                            creators={creators}
+                            loading={loading}
+                            loadingMore={loadingMore}
+                            error={error}
+                            hasMore={hasMore}
+                            onRefresh={refresh}
+                            onLoadMore={loadMore}
+                            onFavoriteChange={handleFavoriteChange}
+                        />
+                    ) : (
+                        <CreatorsTable
+                            creators={creators}
+                            loading={loading}
+                            loadingMore={loadingMore}
+                            error={error}
+                            hasMore={hasMore}
+                            onRefresh={refresh}
+                            onLoadMore={loadMore}
+                            onFavoriteChange={handleFavoriteChange}
+                        />
+                    )
                 )}
             </div>
         </div>

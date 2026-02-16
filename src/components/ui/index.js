@@ -16,6 +16,7 @@ import { Alert } from './Alert.jsx';
 import { Avatar } from './Avatar.jsx';
 import { Skeleton } from './Skeleton.jsx';
 import { Divider } from './Divider.jsx';
+import { Table, TableHeader, TableBody, TableCell, TableSkeleton } from './Table.jsx';
 
 // Exportar individualmente
 export { Button };
@@ -30,6 +31,7 @@ export { Alert };
 export { Avatar };
 export { Skeleton };
 export { Divider };
+export { Table, TableHeader, TableBody, TableCell, TableSkeleton };
 
 // Exportar como objeto UI para compatibilidad con el código existente
 export const UI = {
@@ -45,6 +47,11 @@ export const UI = {
     Avatar,
     Skeleton,
     Divider,
+    Table,
+    TableHeader,
+    TableBody,
+    TableCell,
+    TableSkeleton,
 };
 
 export default UI;
